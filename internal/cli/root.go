@@ -23,6 +23,7 @@ func NewRootCmd() *cobra.Command {
 	root.PersistentFlags().BoolP("verbose", "v", false, "Enable verbose diagnostic logging")
 
 	root.AddCommand(newVersionCmd())
+	root.AddCommand(newProfileCmd())
 
 	return root
 }

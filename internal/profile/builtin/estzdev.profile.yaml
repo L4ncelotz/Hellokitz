@@ -1,0 +1,17 @@
+# HelloKit example profile — NOT a capture of any person's real machine.
+# Edit apps and versions to match your own preferences before using.
+# Schema is proposed; parser/CLI do not exist in this documentation pack.
+schema_version: 1
+name: estzdev
+description: Starter Windows developer setup; customize before applying
+platform:
+  os: windows
+  architectures: [amd64]
+applications:
+  - id: Git.Git
+    source: winget
+  - id: Microsoft.VisualStudioCode
+    source: winget
+runtimes: []
+editor_extensions: []
+settings: []

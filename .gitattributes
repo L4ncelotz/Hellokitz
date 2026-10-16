@@ -1,0 +1,4 @@
+# Enforce LF line endings for Go sources so gofmt is stable on every
+# checkout. GitHub windows-latest runners check out CRLF by default, which
+# gofmt flags and fails the CI "Check formatting" step.
+*.go text eol=lf

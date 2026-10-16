@@ -24,6 +24,7 @@ func NewRootCmd() *cobra.Command {
 
 	root.AddCommand(newVersionCmd())
 	root.AddCommand(newProfileCmd())
+	root.AddCommand(newDoctorCmd())
 
 	return root
 }

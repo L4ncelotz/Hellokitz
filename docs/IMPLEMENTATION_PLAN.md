@@ -15,7 +15,7 @@ architecture upfront.
 
 ## M0 — Repository and specifications
 
-- [ ] Agree on final GitHub module path, open-source license, owner and package release policy.
+- [ ] Agree on final GitHub module path, open-source license, owner and package release policy. (Decided: canonical module path is `github.com/L4ncelotz/Hellokitz` now that the repository exists. The `module hellokit` rename is deferred to a dedicated chore because it touches every import; no functional need yet. License/owner/release policy still open.)
 - [ ] Decide initial supported Windows versions/architectures through VM inspection.
 - [ ] Confirm actual Estzdev app list and versions; keep the included example illustrative until then.
 - [ ] Initialize Go module with a supported toolchain and review/pin Cobra, Huh v2, YAML v4. (Done except Huh v2: Cobra v1.9.1 and YAML v4 prerelease pinned; Huh v2 deferred to M3 interactive work.)

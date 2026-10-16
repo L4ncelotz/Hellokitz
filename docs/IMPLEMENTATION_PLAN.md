@@ -1,6 +1,9 @@
 # Implementation Plan — HelloKit Windows MVP
 
-**Status: NOT STARTED.** Checkboxes represent work to be performed, not completed functionality. Prioritize working, safe vertical slices over building a broad architecture upfront.
+**Status: M0 and M1 implemented and verified locally (see gates below); M2 not
+started.** Checkboxes represent work to be performed, not completed
+functionality. Prioritize working, safe vertical slices over building a broad
+architecture upfront.
 
 ## Delivery policy
 
@@ -15,23 +18,23 @@
 - [ ] Agree on final GitHub module path, open-source license, owner and package release policy.
 - [ ] Decide initial supported Windows versions/architectures through VM inspection.
 - [ ] Confirm actual Estzdev app list and versions; keep the included example illustrative until then.
-- [ ] Initialize Go module with a supported toolchain and review/pin Cobra, Huh v2, YAML v4.
-- [ ] Create `cmd/hellokit` entry point and minimal `internal` packages as needed.
-- [ ] Add README build instructions **after** verifying them in a clean checkout.
-- [ ] Add GitHub Actions for fmt/vet/unit tests/build on Windows; release pipeline deferred.
+- [ ] Initialize Go module with a supported toolchain and review/pin Cobra, Huh v2, YAML v4. (Done except Huh v2: Cobra v1.9.1 and YAML v4 prerelease pinned; Huh v2 deferred to M3 interactive work.)
+- [x] Create `cmd/hellokit` entry point and minimal `internal` packages as needed.
+- [x] Add README build instructions **after** verifying them in a clean checkout. (Verified via fresh clone: `go test -p 1 ./...`, build, and `version`/`doctor`/`profile`/`plan` smoke tests.)
+- [ ] Add GitHub Actions for fmt/vet/unit tests/build on Windows; release pipeline deferred. (Workflow file added; first remote run pending on first PR.)
 
-**Gate M0:** `hellokit version` and `hellokit --help` run on Windows without Node/Python/Bun installed; tests and build pass. No package installation code yet.
+**Gate M0:** `hellokit version` and `hellokit --help` run on Windows without Node/Python/Bun installed; tests and build pass. No package installation code yet. (Met locally; CI run pending.)
 
 ## M1 — Local profile parser and read-only CLI
 
-- [ ] Implement bounded `schema_version: 1` YAML loader, typed structures and strict validation.
-- [ ] Implement local profile resolution, builtin sample support and visible name-collision behavior.
-- [ ] Implement `profile list`, `profile show`, `profile validate`.
-- [ ] Implement platform detection and `doctor` with read-only capability checks.
-- [ ] Implement `plan --file` with deterministic dummy/fake inventory for unit tests.
-- [ ] Cover wrong OS, duplicate IDs, unknown keys, malformed YAML, path issues and oversized inputs.
+- [x] Implement bounded `schema_version: 1` YAML loader, typed structures and strict validation.
+- [x] Implement local profile resolution, builtin sample support and visible name-collision behavior.
+- [x] Implement `profile list`, `profile show`, `profile validate`.
+- [x] Implement platform detection and `doctor` with read-only capability checks.
+- [x] Implement `plan --file` with deterministic dummy/fake inventory for unit tests.
+- [x] Cover wrong OS, duplicate IDs, unknown keys, malformed YAML, path issues and oversized inputs.
 
-**Gate M1:** Invalid input cannot reach any adapter mutator. Commands produce useful errors even on non-Windows hosts (unsupported OS) instead of panicking.
+**Gate M1:** Invalid input cannot reach any adapter mutator. Commands produce useful errors even on non-Windows hosts (unsupported OS) instead of panicking. (Met: no mutators exist yet; non-Windows behavior covered by unit tests with injected host only — no real non-Windows run performed.)
 
 ## M2 — WinGet planning and safe execution
 
@@ -94,7 +97,10 @@
 
 ## Current work queue
 
-Start with **M0** only. Do not create a web app or cloud backend during the CLI MVP. If M4 scope threatens reliability, cut optional config/editor-extension adapters from the first beta while retaining explicit unsupported status and an updated Product/README contract.
+M0 and M1 are done (pending remote CI on first PR). Start **M2** with a small,
+testable slice: WinGet read-only capability and installed-state probes only —
+no installation or mutation. Do not create a web app or cloud backend during
+the CLI MVP. If M4 scope threatens reliability, cut optional config/editor-extension adapters from the first beta while retaining explicit unsupported status and an updated Product/README contract.
 
 ## Suggested agent prompt
 

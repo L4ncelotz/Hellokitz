@@ -2,7 +2,10 @@
 
 > One command. Your dev environment.
 
-**Status: specification / planning.** This repository documentation describes a proposed implementation. It does **not** mean the CLI, installer, login flow, or website already exists.
+**Status: M0 and M1 read-only slices implemented.** The CLI builds and runs
+`version`, `profile validate/list/show`, `doctor`, and `plan --file` against
+local YAML profiles. Installation, `setup`, named `plan --profile`, and any
+cloud features do **not** exist yet.
 
 HelloKit is an offline-first CLI for recreating a chosen developer environment on a fresh Windows machine. Pick a named profile such as **Estzdev**, use a guided **Custom** flow, or load a local profile file. HelloKit checks the machine, presents a clear change plan, asks for approval, applies the changes, and verifies the result.
 
@@ -16,7 +19,20 @@ The goal is **a dependable setup workflow**, not another package manager. HelloK
 4. **No hidden execution:** package sources, configuration writes, administrator requirements, and failures must be visible.
 5. **One core engine:** interactive CLI, non-interactive CLI, and future cloud profiles feed the same validated plan-and-apply pipeline.
 
-## Planned example experience (not implemented)
+## Command status
+
+Implemented and verified on Windows (read-only; nothing is installed):
+
+```powershell
+hellokit version
+hellokit profile validate --file examples/estzdev.profile.yaml
+hellokit profile list
+hellokit profile show estzdev
+hellokit doctor
+hellokit plan --file examples/estzdev.profile.yaml
+```
+
+Planned but not implemented:
 
 ```powershell
 hellokit setup
@@ -24,8 +40,6 @@ hellokit setup
 # Preflight -> Preview -> Confirm -> Apply -> Verify
 
 hellokit plan --profile estzdev
-hellokit doctor
-hellokit profile list
 ```
 
 The included [`examples/estzdev.profile.yaml`](examples/estzdev.profile.yaml) is a **sample** profile, not a capture of anyone's actual machine. Edit its selections before using it.
@@ -54,9 +68,13 @@ Windows-first native Go binary; local profile loading; Estzdev and Custom setup 
 
 ## Development status
 
-M0 bootstrap is implemented: Go module, `hellokit --help` / `hellokit version`
-(Cobra), unit tests, and Windows CI. No installer, package installation code,
-or profile loading exists yet. See [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) for remaining milestones.
+M0 bootstrap and M1 read-only slices (1–4) are implemented and verified
+(see above): Go module, Cobra CLI, strict schema v1 profile loading with
+local/builtin resolution, `doctor` host checks, and read-only `plan --file`
+previews. Detection shows `unknown` where adapters do not exist yet.
+No installer, package installation code, `setup` flow, or remote features
+exist. See [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) for
+remaining milestones.
 
 ## Development & Build
 
@@ -67,6 +85,10 @@ go test ./...
 go build -o hellokit.exe ./cmd/hellokit
 .\hellokit.exe --help
 .\hellokit.exe version
+.\hellokit.exe doctor
+.\hellokit.exe profile validate --file examples/estzdev.profile.yaml
+.\hellokit.exe profile list
+.\hellokit.exe plan --file examples/estzdev.profile.yaml
 ```
 
 ## References

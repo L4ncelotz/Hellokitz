@@ -48,12 +48,19 @@ type Plan struct {
 	Actions     []Action
 }
 
+// Observation reports what an inventory detected about a target.
+type Observation struct {
+	State   string // Base state: StateSatisfied, StateMissing, or StateUnknown
+	Version string // Detected installed version, or empty string if absent/unversioned/unknown
+	Detail  string // Human-readable explanation or error message
+}
+
 // Inventory reports detected installation state. Implementations must
 // distinguish a successful query from an inability to query.
 type Inventory interface {
-	// LookupApplication returns the detected state and a short detail for
-	// one application. Unknown states must explain what could not be verified.
-	LookupApplication(id, source string) (state, detail string)
+	// LookupApplication returns what the inventory detected for one application.
+	// Unknown states must explain what could not be verified.
+	LookupApplication(id, source string) Observation
 }
 
 // UnknownInventory reports every application as unknown. The CLI uses it
@@ -62,8 +69,11 @@ type Inventory interface {
 type UnknownInventory struct{}
 
 // LookupApplication implements Inventory.
-func (UnknownInventory) LookupApplication(_, _ string) (string, string) {
-	return StateUnknown, "installation state cannot be determined yet (detection lands in M2)"
+func (UnknownInventory) LookupApplication(_, _ string) Observation {
+	return Observation{
+		State:  StateUnknown,
+		Detail: "installation state cannot be determined yet (detection lands in M2)",
+	}
 }
 
 // Build derives a deterministic preview from a validated profile. Entry
@@ -75,14 +85,32 @@ func Build(p *profile.Profile, inv Inventory) Plan {
 		Platform:    p.Platform.OS + "/" + strings.Join(p.Platform.Architectures, ","),
 	}
 	for _, a := range p.Applications {
-		state, detail := inv.LookupApplication(a.ID, a.Source)
+		obs := inv.LookupApplication(a.ID, a.Source)
+		actionState := obs.State
+		reason := obs.Detail
+
+		if obs.State == StateSatisfied {
+			if a.Version != "" {
+				if obs.Version == "" {
+					actionState = StateUnknown
+					reason = fmt.Sprintf("installed but version cannot be verified against desired %s", a.Version)
+				} else if obs.Version != a.Version {
+					actionState = StateMismatch
+					reason = fmt.Sprintf("installed version %s does not match desired version %s", obs.Version, a.Version)
+				} else {
+					actionState = StateSatisfied
+					reason = fmt.Sprintf("installed version %s matches desired version %s", obs.Version, a.Version)
+				}
+			}
+		}
+
 		pl.Actions = append(pl.Actions, Action{
 			Kind:    KindApplication,
 			Target:  a.ID,
 			Source:  a.Source,
 			Desired: a.Version,
-			State:   state,
-			Reason:  detail,
+			State:   actionState,
+			Reason:  reason,
 		})
 	}
 	for _, r := range p.Runtimes {

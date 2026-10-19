@@ -9,14 +9,14 @@ import (
 
 // fakeInventory is the deterministic test inventory required by M1.
 type fakeInventory struct {
-	apps map[string][2]string // lower(source\x00id) -> (state, detail)
+	apps map[string]Observation // lower(source\x00id) -> Observation
 }
 
-func (f fakeInventory) LookupApplication(id, source string) (string, string) {
+func (f fakeInventory) LookupApplication(id, source string) Observation {
 	if v, ok := f.apps[strings.ToLower(source+"\x00"+id)]; ok {
-		return v[0], v[1]
+		return v
 	}
-	return StateUnknown, "not covered by fake inventory"
+	return Observation{State: StateUnknown, Detail: "not covered by fake inventory"}
 }
 
 func mustParse(t *testing.T, doc string) *profile.Profile {
@@ -57,14 +57,13 @@ settings:
 `
 
 func TestBuild_StateMapping(t *testing.T) {
-	inv := fakeInventory{apps: map[string][2]string{
-		"winget\x00git.git":     {StateSatisfied, "1.0 installed"},
-		"winget\x00missing.app": {StateMissing, "not installed"},
-		"winget\x00stale.app":   {StateMismatch, "1.0 installed, want 2.0.0"},
-		"winget\x00blocked.app": {StateBlocked, "needs elevation"},
+	inv := fakeInventory{apps: map[string]Observation{
+		"winget\x00git.git":     {State: StateSatisfied, Version: "1.0", Detail: "1.0 installed"},
+		"winget\x00missing.app": {State: StateMissing, Detail: "not installed"},
+		"winget\x00stale.app":   {State: StateSatisfied, Version: "1.0", Detail: "1.0 installed"},
+		"winget\x00blocked.app": {State: StateBlocked, Detail: "needs elevation"},
 	}}
 	pl := Build(mustParse(t, planDoc), inv)
-
 	if pl.ProfileName != "plan-test" || pl.Platform != "windows/amd64" {
 		t.Fatalf("unexpected plan identity: %+v", pl)
 	}
@@ -119,5 +118,78 @@ func TestBuild_Deterministic(t *testing.T) {
 		if a.Actions[i] != b.Actions[i] {
 			t.Fatalf("non-deterministic action %d: %+v vs %+v", i, a.Actions[i], b.Actions[i])
 		}
+	}
+}
+
+func TestBuild_VersionComparison(t *testing.T) {
+	doc := `schema_version: 1
+name: ver-test
+platform:
+  os: windows
+  architectures: [amd64]
+applications:
+  - id: Match.App
+    source: winget
+    version: 2.0.0
+  - id: Mismatch.App
+    source: winget
+    version: 2.0.0
+  - id: UnknownVer.App
+    source: winget
+    version: 2.0.0
+  - id: Unpinned.App
+    source: winget
+  - id: MissingPinned.App
+    source: winget
+    version: 3.0.0
+`
+	inv := fakeInventory{apps: map[string]Observation{
+		"winget\x00match.app":         {State: StateSatisfied, Version: "2.0.0", Detail: "v2.0.0"},
+		"winget\x00mismatch.app":      {State: StateSatisfied, Version: "1.5.0", Detail: "v1.5.0"},
+		"winget\x00unknownver.app":    {State: StateSatisfied, Version: "", Detail: "installed"},
+		"winget\x00unpinned.app":      {State: StateSatisfied, Version: "4.0.0", Detail: "v4.0.0"},
+		"winget\x00missingpinned.app": {State: StateMissing, Detail: "absent"},
+	}}
+
+	pl := Build(mustParse(t, doc), inv)
+	if len(pl.Actions) != 5 {
+		t.Fatalf("expected 5 actions, got %d", len(pl.Actions))
+	}
+
+	// Match.App: pinned matches installed
+	if pl.Actions[0].State != StateSatisfied {
+		t.Errorf("Match.App: got state %s, want %s", pl.Actions[0].State, StateSatisfied)
+	}
+	if !strings.Contains(pl.Actions[0].Reason, "matches desired version 2.0.0") {
+		t.Errorf("Match.App: unexpected reason %q", pl.Actions[0].Reason)
+	}
+
+	// Mismatch.App: pinned differs from installed
+	if pl.Actions[1].State != StateMismatch {
+		t.Errorf("Mismatch.App: got state %s, want %s", pl.Actions[1].State, StateMismatch)
+	}
+	if !strings.Contains(pl.Actions[1].Reason, "does not match desired version 2.0.0") {
+		t.Errorf("Mismatch.App: unexpected reason %q", pl.Actions[1].Reason)
+	}
+
+	// UnknownVer.App: pinned but installed version empty
+	if pl.Actions[2].State != StateUnknown {
+		t.Errorf("UnknownVer.App: got state %s, want %s", pl.Actions[2].State, StateUnknown)
+	}
+	if !strings.Contains(pl.Actions[2].Reason, "version cannot be verified against desired 2.0.0") {
+		t.Errorf("UnknownVer.App: unexpected reason %q", pl.Actions[2].Reason)
+	}
+
+	// Unpinned.App: floating version, stays satisfied with adapter detail
+	if pl.Actions[3].State != StateSatisfied {
+		t.Errorf("Unpinned.App: got state %s, want %s", pl.Actions[3].State, StateSatisfied)
+	}
+	if pl.Actions[3].Reason != "v4.0.0" {
+		t.Errorf("Unpinned.App: got reason %q, want v4.0.0", pl.Actions[3].Reason)
+	}
+
+	// MissingPinned.App: missing remains missing
+	if pl.Actions[4].State != StateMissing {
+		t.Errorf("MissingPinned.App: got state %s, want %s", pl.Actions[4].State, StateMissing)
 	}
 }

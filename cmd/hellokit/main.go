@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"hellokit/internal/cli"
+	"github.com/L4ncelotz/Hellokitz/internal/cli"
 )
 
 func main() {

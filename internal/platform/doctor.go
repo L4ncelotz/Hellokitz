@@ -73,8 +73,7 @@ func Diagnose(ctx context.Context, host Info, run CommandRunner) Report {
 func probeTool(ctx context.Context, run CommandRunner, label, name, arg string) Check {
 	out, err := run.Run(ctx, name, arg)
 	if err != nil {
-		var execErr *exec.Error
-		if errors.Is(err, exec.ErrNotFound) || errors.As(err, &execErr) {
+		if errors.Is(err, exec.ErrNotFound) {
 			return Check{Name: label, State: StateMissing, Detail: name + " executable not found"}
 		}
 		if firstLine(out) != "" {

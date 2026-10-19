@@ -1,7 +1,6 @@
 # Implementation Plan — HelloKit Windows MVP
 
-**Status: M0 and M1 implemented and verified locally (see gates below); M2 not
-started.** Checkboxes represent work to be performed, not completed
+**Status: M0, M1, and M2 Slice 1 implemented and verified locally; M2 execution/apply not started.** Checkboxes represent work to be performed, not completed
 functionality. Prioritize working, safe vertical slices over building a broad
 architecture upfront.
 
@@ -15,7 +14,7 @@ architecture upfront.
 
 ## M0 — Repository and specifications
 
-- [ ] Agree on final GitHub module path, open-source license, owner and package release policy.
+- [x] Agree on final GitHub module path, open-source license, owner and package release policy. (Canonical module path migrated to `github.com/L4ncelotz/Hellokitz`; MIT license added.)
 - [ ] Decide initial supported Windows versions/architectures through VM inspection.
 - [ ] Confirm actual Estzdev app list and versions; keep the included example illustrative until then.
 - [ ] Initialize Go module with a supported toolchain and review/pin Cobra, Huh v2, YAML v4. (Done except Huh v2: Cobra v1.9.1 and YAML v4 prerelease pinned; Huh v2 deferred to M3 interactive work.)
@@ -38,10 +37,10 @@ architecture upfront.
 
 ## M2 — WinGet planning and safe execution
 
-- [ ] Define adapter interface: capability probe, installed-state probe, install, verify.
-- [ ] Implement WinGet exact ID/source invocation via `exec.CommandContext` argument arrays.
+- [x] Define adapter interface: capability probe, installed-state probe, typed observation.
+- [x] Implement WinGet exact ID/source invocation via `exec.CommandContext` argument arrays with HRESULT error handling and column-anchored table parsing.
 - [ ] Validate behavior of detection/version queries in a supported Windows VM, including localized consoles.
-- [ ] Implement immutable plan model, missing/unknown/blocked outcomes and prerequisites.
+- [x] Implement immutable plan model, missing/unknown/blocked outcomes and version mismatch detection.
 - [ ] Implement readable plan output and `setup --dry-run` (strictly read-only).
 - [ ] Implement approvals bound to plan fingerprint, with no silent license or privilege consent.
 - [ ] Implement sequential apply runner with cancellation, logs, partial failure and post-install verification.
@@ -97,11 +96,7 @@ architecture upfront.
 
 ## Current work queue
 
-M0 and M1 are done (pending remote CI on first PR). Start **M2** with a small,
-testable slice: WinGet read-only capability and installed-state probes only —
-no installation or mutation. Do not create a web app or cloud backend during
-the CLI MVP. If M4 scope threatens reliability, cut optional config/editor-extension adapters from the first beta while retaining explicit unsupported status and an updated Product/README contract.
-
+M0, M1, and M2 Slice 1 are done. Next for **M2**: validate detection queries in a supported Windows VM, then implement approvals bound to plan fingerprint and the sequential apply runner with cancellation, logs, partial failure, and post-install verification. Do not create a web app or cloud backend during the CLI MVP.
 ## Suggested agent prompt
 
 > Read AGENTS.md, PRODUCT.md, ARCHITECTURE.md, PROFILE_SPEC.md and IMPLEMENTATION_PLAN.md. Implement only the first unchecked milestone that can be completed as a safe vertical slice. Do not run real installers outside a disposable Windows VM. Add tests and report the precise commands run and failures. Do not build features in the Future roadmap.

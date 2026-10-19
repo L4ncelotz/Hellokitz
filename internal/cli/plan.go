@@ -6,8 +6,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"hellokit/internal/plan"
-	"hellokit/internal/profile"
+	"github.com/L4ncelotz/Hellokitz/internal/plan"
+	"github.com/L4ncelotz/Hellokitz/internal/profile"
 )
 
 func newPlanCmd() *cobra.Command {

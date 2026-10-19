@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"hellokit/internal/plan"
+	"github.com/L4ncelotz/Hellokitz/internal/plan"
 )
 
 // fakeRunner records invocations and replays canned results.

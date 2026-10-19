@@ -44,6 +44,13 @@ func TestParse_Valid(t *testing.T) {
 	if s.Applications != 2 || s.Runtimes != 1 || s.Extensions != 1 || s.Settings != 1 {
 		t.Errorf("unexpected summary: %+v", s)
 	}
+
+	for _, goodVer := range []string{"24.11.1", "v24.11.1", "3.13.0rc1", "3.13.0-rc.1", "1.0", "20"} {
+		doc := strings.Replace(validDoc, "version: 24.11.1", "version: "+goodVer, 1)
+		if _, err := Parse([]byte(doc)); err != nil {
+			t.Errorf("Parse with valid version %q failed: %v", goodVer, err)
+		}
+	}
 }
 
 func TestParse_ShippedExample(t *testing.T) {
@@ -98,6 +105,13 @@ func TestParse_Invalid(t *testing.T) {
 		{"runtimeNoVersion", "schema_version: 1\nname: qq\nplatform:\n  os: windows\n  architectures: [amd64]\nruntimes:\n  - name: node\n    manager: mise\n", "version is required"},
 		{"runtimeLatest", "schema_version: 1\nname: qq\nplatform:\n  os: windows\n  architectures: [amd64]\nruntimes:\n  - name: node\n    manager: mise\n    version: latest\n", "not an exact version"},
 		{"runtimeStar", "schema_version: 1\nname: qq\nplatform:\n  os: windows\n  architectures: [amd64]\nruntimes:\n  - name: node\n    manager: mise\n    version: \"*\"\n", "not an exact version"},
+		{"runtimeLTS", "schema_version: 1\nname: qq\nplatform:\n  os: windows\n  architectures: [amd64]\nruntimes:\n  - name: node\n    manager: mise\n    version: lts\n", "not an exact version"},
+		{"runtimeLTSWildcard", "schema_version: 1\nname: qq\nplatform:\n  os: windows\n  architectures: [amd64]\nruntimes:\n  - name: node\n    manager: mise\n    version: lts/*\n", "not an exact version"},
+		{"runtimeLTSNamed", "schema_version: 1\nname: qq\nplatform:\n  os: windows\n  architectures: [amd64]\nruntimes:\n  - name: node\n    manager: mise\n    version: lts/iron\n", "not an exact version"},
+		{"runtimeStable", "schema_version: 1\nname: qq\nplatform:\n  os: windows\n  architectures: [amd64]\nruntimes:\n  - name: node\n    manager: mise\n    version: stable\n", "not an exact version"},
+		{"runtimeWildcardX", "schema_version: 1\nname: qq\nplatform:\n  os: windows\n  architectures: [amd64]\nruntimes:\n  - name: node\n    manager: mise\n    version: 20.x\n", "not an exact version"},
+		{"runtimeRangeCaret", "schema_version: 1\nname: qq\nplatform:\n  os: windows\n  architectures: [amd64]\nruntimes:\n  - name: node\n    manager: mise\n    version: \"^20.0.0\"\n", "not an exact version"},
+		{"runtimeRangeTilde", "schema_version: 1\nname: qq\nplatform:\n  os: windows\n  architectures: [amd64]\nruntimes:\n  - name: node\n    manager: mise\n    version: \"~20.0.0\"\n", "not an exact version"},
 		{"runtimeManager", "schema_version: 1\nname: qq\nplatform:\n  os: windows\n  architectures: [amd64]\nruntimes:\n  - name: node\n    manager: brew\n    version: 24.11.1\n", "manager"},
 		{"runtimeCatalog", "schema_version: 1\nname: qq\nplatform:\n  os: windows\n  architectures: [amd64]\nruntimes:\n  - name: https://evil.example/plugin\n    manager: mise\n    version: 1.0.0\n", "catalog"},
 		{"dupRuntimes", "schema_version: 1\nname: qq\nplatform:\n  os: windows\n  architectures: [amd64]\nruntimes:\n  - name: node\n    manager: mise\n    version: 24.11.1\n  - name: Node\n    manager: mise\n    version: 22.0.0\n", "duplicate"},

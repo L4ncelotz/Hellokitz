@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"hellokit/internal/profile"
+	"github.com/L4ncelotz/Hellokitz/internal/profile"
 )
 
 // fakeInventory is the deterministic test inventory required by M1.

@@ -130,3 +130,20 @@ func TestDiagnose_TimeoutIsUnknown(t *testing.T) {
 		}
 	}
 }
+
+func TestDiagnose_ExecErrorOtherThanNotFound(t *testing.T) {
+	// An *exec.Error whose wrapped Err is not exec.ErrNotFound (such as
+	// permission denied) must be reported as StateUnknown, not StateMissing.
+	run := fakeRunner{fn: func(name string, _ ...string) (string, error) {
+		return "", &exec.Error{Name: name, Err: errors.New("permission denied")}
+	}}
+	r := Diagnose(context.Background(), Info{"windows", "amd64"}, run)
+	for _, c := range r.Checks[1:] {
+		if c.State != StateUnknown {
+			t.Errorf("tool check %q with permission denied = %s, want unknown", c.Name, c.State)
+		}
+		if !strings.Contains(c.Detail, "permission denied") {
+			t.Errorf("tool check %q detail = %q, want mention of permission denied", c.Name, c.Detail)
+		}
+	}
+}

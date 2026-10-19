@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"hellokit/internal/platform"
+	"github.com/L4ncelotz/Hellokitz/internal/platform"
 )
 
 // doctorRunner executes capability probes. Tests replace it with a fake;

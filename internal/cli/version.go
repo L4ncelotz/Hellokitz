@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"hellokit/internal/version"
+	"github.com/L4ncelotz/Hellokitz/internal/version"
 )
 
 func newVersionCmd() *cobra.Command {

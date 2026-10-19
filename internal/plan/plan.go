@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"strings"
 
-	"hellokit/internal/profile"
+	"github.com/L4ncelotz/Hellokitz/internal/profile"
 )
 
 // Action states carried by a plan.

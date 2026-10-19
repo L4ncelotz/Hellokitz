@@ -36,9 +36,21 @@ const (
 var (
 	namePattern       = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_-]{1,39}$`)
 	idPattern         = regexp.MustCompile(`^[A-Za-z0-9._-]{1,128}$`)
-	versionTag        = regexp.MustCompile(`^(?i)latest$|^\*$`)
 	settingKeyPattern = regexp.MustCompile(`^[A-Za-z0-9._-]{1,128}$`)
+
+	// exactVersionPattern requires versions to start with digits (or optional 'v'/'V' prefix)
+	// followed by dot-separated numeric segments and optional prerelease/build metadata.
+	exactVersionPattern = regexp.MustCompile(`^[vV]?[0-9]+(\.[0-9]+)*([.-][A-Za-z0-9_.-]+)?$`)
+	// floatingVersionPattern flags aliases, wildcards, ranges, and floating tags like latest, lts, stable.
+	floatingVersionPattern = regexp.MustCompile(`(?i)^(latest|lts.*|stable|current|nightly|system|default|node)$|[\*xX\^~><]`)
 )
+
+func isExactVersion(v string) bool {
+	if floatingVersionPattern.MatchString(v) {
+		return false
+	}
+	return exactVersionPattern.MatchString(v)
+}
 
 // supportedOS / architectures / managers / catalogs for schema v1.
 var (
@@ -242,7 +254,7 @@ func (p *Profile) Validate() error {
 		if len(r.Version) > MaxVersionLength {
 			return fmt.Errorf("runtimes[%d]: version exceeds %d characters", i, MaxVersionLength)
 		}
-		if versionTag.MatchString(r.Version) {
+		if !isExactVersion(r.Version) {
 			return fmt.Errorf("runtimes[%d]: version %q is not an exact version", i, r.Version)
 		}
 		key := strings.ToLower(r.Manager + "\x00" + r.Name)

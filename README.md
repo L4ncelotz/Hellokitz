@@ -2,10 +2,11 @@
 
 > One command. Your dev environment.
 
-**Status: M0 and M1 read-only slices implemented.** The CLI builds and runs
+**Status: M0, M1, and M2 Slice 1 implemented.** The CLI builds and runs
 `version`, `profile validate/list/show`, `doctor`, and `plan --file` against
-local YAML profiles. Installation, `setup`, named `plan --profile`, and any
-cloud features do **not** exist yet.
+local YAML profiles, with WinGet read-only capability and installed-state
+probes. Installation, `setup`, named `plan --profile`, and any cloud features
+do **not** exist yet.
 
 HelloKit is an offline-first CLI for recreating a chosen developer environment on a fresh Windows machine. Pick a named profile such as **Estzdev**, use a guided **Custom** flow, or load a local profile file. HelloKit checks the machine, presents a clear change plan, asks for approval, applies the changes, and verifies the result.
 
@@ -68,10 +69,12 @@ Windows-first native Go binary; local profile loading; Estzdev and Custom setup 
 
 ## Development status
 
-M0 bootstrap and M1 read-only slices (1–4) are implemented and verified
-(see above): Go module, Cobra CLI, strict schema v1 profile loading with
-local/builtin resolution, `doctor` host checks, and read-only `plan --file`
-previews. Detection shows `unknown` where adapters do not exist yet.
+M0 bootstrap, M1 read-only slices, and M2 Slice 1 (WinGet read-only adapter
+and typed inventory observations) are implemented and verified: canonical Go
+module (`github.com/L4ncelotz/Hellokitz`), MIT license, Cobra CLI, strict
+schema v1 profile loading with local/builtin resolution, `doctor` host checks,
+column-anchored WinGet installed lookup with HRESULT support, and read-only
+`plan --file` previews.
 No installer, package installation code, `setup` flow, or remote features
 exist. See [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) for
 remaining milestones.

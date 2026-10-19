@@ -17,8 +17,8 @@ import (
 	"os/exec"
 	"strings"
 
-	"hellokit/internal/plan"
-	"hellokit/internal/platform"
+	"github.com/L4ncelotz/Hellokitz/internal/plan"
+	"github.com/L4ncelotz/Hellokitz/internal/platform"
 )
 
 // Binary is the WinGet executable name.

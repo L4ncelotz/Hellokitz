@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"hellokit/internal/platform"
+	"github.com/L4ncelotz/Hellokitz/internal/platform"
 )
 
 type fakeDoctorRunner struct {

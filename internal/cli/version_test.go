@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"hellokit/internal/version"
+	"github.com/L4ncelotz/Hellokitz/internal/version"
 )
 
 func executeRoot(args ...string) (string, error) {

@@ -1,4 +1,4 @@
-module hellokit
+module github.com/L4ncelotz/Hellokitz
 
 go 1.24
 

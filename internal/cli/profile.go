@@ -9,7 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"hellokit/internal/profile"
+	"github.com/L4ncelotz/Hellokitz/internal/profile"
 )
 
 // userDirOverride pins the user profile directory in tests. Production code
